@@ -24,7 +24,7 @@ st.sidebar.divider()
 
 # Input section in sidebar
 st.sidebar.header("⚙️ Settings")
-input_tick = st.sidebar.text_input("Enter stock ticker:", value="AAPL")
+input_tick = st.sidebar.text_input("Enter stock ticker:")
 
 # Analyze button
 analyze_button = st.sidebar.button("🔍 Run Analysis", type="primary")
@@ -43,6 +43,11 @@ if 'sentiment_df' not in st.session_state:
     st.session_state.sentiment_df = None
 if 'logs' not in st.session_state:
     st.session_state.logs = ""
+if 'company_name' not in st.session_state: 
+    st.session_state.company_name = ""
+if 'input_tick' not in st.session_state:  
+    st.session_state.input_tick = ""
+
 
 # ==================== Analyze button logic ====================
 if analyze_button:
@@ -55,9 +60,12 @@ if analyze_button:
             tp = TickerParser(ticker=input_tick)
             company_name = tp.ticker_to_company_name()
             
+            st.session_state.company_name = company_name 
+            st.session_state.input_tick = input_tick  
+            
             # Initialize processors
-            st.session_state.dp = DataProcessor(tick=input_tick, company_name=company_name)
-            st.session_state.da = DataAnalyser(tick=input_tick, company_name=company_name)
+            st.session_state.dp = DataProcessor(tick=st.session_state.input_tick, company_name=st.session_state.company_name)
+            st.session_state.da = DataAnalyser(tick=st.session_state.input_tick, company_name=st.session_state.company_name)
             st.session_state.sentiment_df = st.session_state.dp.generate_sentiment_df()[0]
             
             st.session_state.analyzed = True
@@ -85,9 +93,9 @@ else:
         # Metrics
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Stock Ticker", input_tick)
+            st.metric("Stock Ticker", st.session_state.input_tick)
         with col2:
-            st.metric("Company", company_name)
+            st.metric("Company", st.session_state.company_name)
         with col3:
             corr = st.session_state.da.df['normalised_STM_Score'].corr(
                 st.session_state.da.df['normalised_Daily_return'])
@@ -118,7 +126,8 @@ else:
         # Sentiment Data
         st.subheader("1. News Sentiment Analysis")
         st.markdown("*Individual sentiment scores for each news headline*")
-        st.dataframe(st.session_state.sentiment_df, use_container_width=True, height=300)
+        display_df1 = st.session_state.sentiment_df.reset_index(drop=True).drop(columns=["is_weekday"])
+        st.dataframe(display_df1, use_container_width=True, height=300)
         
         # Download button
         csv = st.session_state.sentiment_df.to_csv(index=False)
@@ -131,10 +140,17 @@ else:
         
         st.divider()
         
-        # Normalized Data
-        st.subheader("2. Normalized Data")
-        st.markdown("*Sentiment scores and daily returns normalized using Z-scores*")
-        st.dataframe(st.session_state.da.df, use_container_width=True, height=300)
+        # Summary Data
+        st.subheader("2. Summary Data")
+        st.markdown("*Summary data for the past weekdays*")
+        st.markdown("""
+                - **Sentiment Score: -1 (Negative) ~ 1 (Positive)**
+                - **Daily Return (%): -100 ~ 100**
+                """)
+        display_df2 = st.session_state.da.df.drop(columns=["is_weekday"])
+        display_df2 = display_df2[["Date", "Day", "STM Score", "normalised_STM_Score", "Daily_return (%)", "normalised_Daily_return"]]
+        display_df2.columns = ["Date", "Day", "Sentiment Score", "nSentiment Score", "Daily Return (%)", "nDaily Return (%)"]
+        st.dataframe(display_df2, use_container_width=True, height=300)
         
         # Download button
         csv2 = st.session_state.da.df.to_csv(index=False)
@@ -149,28 +165,12 @@ else:
     elif page == "📈 Graphs":
         st.header("📈 Visualizations")
         
-        # Update plot sizes dynamically
-        # Time Series
+        # Time Series line graph
+        
         st.subheader("1. Time Series Comparison")
         st.caption("Track how sentiment and returns change over time")
         
-        # Create plot with custom size
-        plt.style.use("seaborn-v0_8-darkgrid")
-        fig1, ax1 = plt.subplots(figsize=(12,6), dpi=100)
-        
-        df = st.session_state.da.df
-        x = df.index
-        ax1.plot(x, df["normalised_STM_Score"], color="tab:orange", marker="o", label="normalised sentiment score")
-        ax1.plot(x, df["normalised_Daily_return"], color="tab:blue", marker="o", label="normalised daily return")
-        ax1.set_title(f"Sentiment Score vs Daily Return ({input_tick})")
-        ax1.set_xticks(df.index)
-        ax1.set_xticklabels(df["Date"])
-        ax1.tick_params(axis="x", labelrotation=45)
-        ax1.legend()
-        plt.tight_layout()
-        
-        st.pyplot(fig1, use_container_width=True)
-        plt.close(fig1)
+        st.pyplot(st.session_state.da.plot_time_series(), use_container_width=True)
         
         st.divider()
         
@@ -178,28 +178,7 @@ else:
         st.subheader("2. Correlation Analysis")
         st.caption("Examine the relationship between sentiment scores and daily returns")
         
-        from scipy.stats import pearsonr
-        import seaborn as sns
-        
-        sns.set_theme()
-        fig2, ax2 = plt.subplots(figsize=(12,6), dpi=100)
-        
-        stm_score = df["normalised_STM_Score"]
-        daily_return = df["normalised_Daily_return"]
-        corr, p_val = pearsonr(stm_score, daily_return)
-        
-        sns.regplot(x=stm_score, y=daily_return, ax=ax2, ci=None)
-        ax2.text(0.05, 0.95, f'r = {corr:.3f}', 
-                transform=ax2.transAxes, 
-                verticalalignment='top',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
-        ax2.set_title(f"Sentiment Score vs Daily Return ({input_tick})")
-        ax2.set_ylabel("Daily Return")
-        ax2.set_xlabel("Sentiment Score")
-        plt.tight_layout()
-        
-        st.pyplot(fig2, use_container_width=True)
-        plt.close(fig2)
+        st.pyplot(st.session_state.da.plot_scatter(), use_container_width=True)
         
         st.divider()
         
@@ -207,14 +186,4 @@ else:
         st.subheader("3. Side-by-Side Comparison")
         st.caption("Compare normalized sentiment and returns for each day")
         
-        fig3, ax3 = plt.subplots(figsize=(12,6), dpi=100)
-        df[["normalised_STM_Score", "normalised_Daily_return"]].plot(
-            kind="bar", ax=ax3, color=["tab:orange", "tab:blue"]
-        )
-        ax3.set_title(f"Sentiment Score vs Daily Return ({input_tick})")
-        ax3.legend(["normalised sentiment score", "normalised daily return"])
-        ax3.set_xticklabels(df["Date"])
-        plt.tight_layout()
-        
-        st.pyplot(fig3, use_container_width=True)
-        plt.close(fig3)
+        st.pyplot(st.session_state.da.plot_bar_charts(), use_container_width=True)

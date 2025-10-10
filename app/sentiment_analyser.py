@@ -52,7 +52,7 @@ class SentimentDfGenerator:
         return df
     
     def generate_summary_df(self, df):
-        pt = df.pivot_table(index="Date", values=["STM Score", "is_weekday"], aggfunc="mean").reset_index()
+        pt = df.pivot_table(index=["Date", "Day"], values=["STM Score", "is_weekday"], aggfunc="mean").reset_index()
         pt["STM Score"] = pt["STM Score"].round(2)
         pt["Date"] = pd.to_datetime(pt["Date"])
         return pt

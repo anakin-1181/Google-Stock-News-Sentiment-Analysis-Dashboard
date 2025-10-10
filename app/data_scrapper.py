@@ -22,10 +22,13 @@ class GoogleNewsScrapper:
         df = df.loc[:, ["published", "title"]]
         df.columns = ["Date", "Title"]
         df["Date"] = pd.to_datetime(df["Date"])
-        df["is_weekday"] = df["Date"].dt.day_name()
-        df["is_weekday"] = ((df["is_weekday"] != "Saturday") & (df["is_weekday"] != "Sunday"))
+        df["Day"] = df["Date"].dt.day_name()
+        df["is_weekday"] = ((df["Day"] != "Saturday") & (df["Day"] != "Sunday"))
         df["Date"] = pd.to_datetime(df["Date"])
         df = df.sort_values("Date")
+        df["Source"] = df["Title"].apply(lambda x: x.rsplit("-",1)[1])
+        df["Title"] = df["Title"].apply(lambda x: x.rsplit("-",1)[0])
+        df = df[["Date","Day", "Source", "Title", "is_weekday"]]
         return df
     
 class YFinanceScrapper:

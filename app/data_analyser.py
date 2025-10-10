@@ -32,7 +32,7 @@ class DataAnalyser:
         
         print(self.df)
         
-        fig, ax = plt.subplots(figsize=DataAnalyser.figsize, dpi=50)
+        fig, ax = plt.subplots(figsize=DataAnalyser.figsize, dpi=100)
         x = self.df.index
         date = self.df["Date"]
         stm_score = self.df["normalised_STM_Score"]
@@ -46,14 +46,15 @@ class DataAnalyser:
         # plt.axhline(y=0, color='black', linewidth=1)
         ax.set_xticks(self.df.index)
         ax.set_xticklabels(date)
-        ax.tick_params(axis="x", labelrotation=45)
+        # ax.tick_params(axis="x", labelrotation=45)
         ax.legend()
+        plt.tight_layout()
         return fig
         
     def plot_scatter(self):
         sns.set_theme()
         
-        fig, ax = plt.subplots(figsize=DataAnalyser.figsize, dpi=150)
+        fig, ax = plt.subplots(figsize=DataAnalyser.figsize, dpi=100)
         
         x = self.df.index
         date = self.df["Date"]
@@ -75,7 +76,7 @@ class DataAnalyser:
         return fig
         
     def plot_bar_charts(self):
-        fig, ax = plt.subplots(figsize=DataAnalyser.figsize)
+        fig, ax = plt.subplots(figsize=DataAnalyser.figsize, dpi=100)
         
         self.df[["normalised_STM_Score", "normalised_Daily_return"]].plot(kind="bar", ax=ax, color=["tab:orange", "tab:blue"])
         
