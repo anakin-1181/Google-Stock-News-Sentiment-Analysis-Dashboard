@@ -39,8 +39,6 @@ if 'da' not in st.session_state:
     st.session_state.da = None
 if 'sentiment_df' not in st.session_state:
     st.session_state.sentiment_df = None
-if 'logs' not in st.session_state:
-    st.session_state.logs = ""
 if 'company_name' not in st.session_state: 
     st.session_state.company_name = ""
 if 'input_tick' not in st.session_state:  
@@ -74,10 +72,6 @@ if analyze_button:
         except Exception as e:
             st.error(f"Please input a valid company ticker.")
             st.session_state.analyzed = False
-            
-        finally:
-            sys.stdout = sys.__stdout__
-            st.session_state.logs = captured_output.getvalue()
 
 # ==================== Analyzed Pages ====================
 if not st.session_state.analyzed:
@@ -112,10 +106,6 @@ else:
             """)
         
         st.divider()
-        
-        # Logs
-        st.subheader("Output Log")
-        st.text_area("", value=st.session_state.logs, height=150, label_visibility="collapsed")
     
     # Page 2: Dataframes
     elif page == "Data Tables":
