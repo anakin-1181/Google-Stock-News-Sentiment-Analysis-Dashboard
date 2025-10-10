@@ -83,6 +83,7 @@ class DataAnalyser:
         ax.set_title(f"Sentiment Score vs Daily Return ({self.tick})")
         ax.legend(["normalised sentiment score", "normalised daily return"])
         ax.set_xticklabels(self.df["Date"])
+        ax.tick_params(axis="x", labelrotation=0)
         
         return fig
         

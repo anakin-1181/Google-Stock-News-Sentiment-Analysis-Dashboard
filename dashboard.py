@@ -9,25 +9,23 @@ import sys
 # Page setup
 st.set_page_config(page_title="Stock Sentiment Dashboard", layout="wide")
 
-st.title("📊 Stock Sentiment Analysis Dashboard")
+st.title("Stock News Sentiment Analysis Dashboard")
 st.markdown("*Analyze the relationship between news sentiment and stock returns*")
 
 # ==================== Navigation side bar ====================
-st.sidebar.header("📍 Navigation")
+st.sidebar.header("Navigation")
 page = st.sidebar.radio(
     "Jump to section:",
-    ["🔍 Analyze", "📊 Dataframes", "📈 Graphs"],
+    ["Analyze", "Data Tables", "Graphs"],
     index=0
 )
-
 st.sidebar.divider()
 
 # Input section in sidebar
-st.sidebar.header("⚙️ Settings")
+st.sidebar.header("Settings")
 input_tick = st.sidebar.text_input("Enter stock ticker:")
-
 # Analyze button
-analyze_button = st.sidebar.button("🔍 Run Analysis", type="primary")
+analyze_button = st.sidebar.button("Run Analysis", type="primary")
 
 st.sidebar.divider()
 st.sidebar.caption("Use navigation above to jump between sections")
@@ -83,12 +81,12 @@ if analyze_button:
 
 # ==================== Analyzed Pages ====================
 if not st.session_state.analyzed:
-    st.info("👈 Enter a stock ticker and click 'Run Analysis' to begin")
+    st.info("Enter a stock ticker and click 'Run Analysis' to begin")
     
 else:
     # Page 1: Analyze Overview
-    if page == "🔍 Analyze":
-        st.header("🔍 Analysis Overview")
+    if page == "Analyze":
+        st.header("Analysis Overview")
         
         # Metrics
         col1, col2, col3 = st.columns(3)
@@ -105,7 +103,7 @@ else:
         st.divider()
         
         # Summary
-        st.subheader("📋 Summary")
+        st.subheader("Summary")
         if st.session_state.da.df is not None:
             
             st.markdown(f"""
@@ -116,12 +114,12 @@ else:
         st.divider()
         
         # Logs
-        st.subheader("📋 Output Log")
+        st.subheader("Output Log")
         st.text_area("", value=st.session_state.logs, height=150, label_visibility="collapsed")
     
     # Page 2: Dataframes
-    elif page == "📊 Dataframes":
-        st.header("📊 Data Tables")
+    elif page == "Data Tables":
+        st.header("Data Tables")
         
         # Sentiment Data
         st.subheader("1. News Sentiment Analysis")
@@ -132,7 +130,7 @@ else:
         # Download button
         csv = st.session_state.sentiment_df.to_csv(index=False)
         st.download_button(
-            label="📥 Download Sentiment Data as CSV",
+            label="Download Sentiment Data as CSV",
             data=csv,
             file_name=f"{input_tick}_sentiment_data.csv",
             mime="text/csv"
@@ -155,15 +153,15 @@ else:
         # Download button
         csv2 = st.session_state.da.df.to_csv(index=False)
         st.download_button(
-            label="📥 Download Normalized Data as CSV",
+            label="Download Normalized Data as CSV",
             data=csv2,
             file_name=f"{input_tick}_normalized_data.csv",
             mime="text/csv"
         )
     
     # Page 3: Graphs
-    elif page == "📈 Graphs":
-        st.header("📈 Visualizations")
+    elif page == "Graphs":
+        st.header("Visualizations")
         
         # Time Series line graph
         
