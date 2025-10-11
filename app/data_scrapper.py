@@ -42,10 +42,13 @@ class YFinanceScrapper:
     def process_dataframe(self) -> pd.DataFrame:
         # Only need "Date" and "Close" columns
         df = self.fetch_stock_data()
-        df["Close"] = df["Close"].round(2)
-        df = df.loc[:, ["Close"]].reset_index().assign(Date=lambda x: x["Date"].dt.date)    
-        df["Daily_return (%)"] = round(df["Close"].pct_change() * 100, 2)
-        df["Date"] = pd.to_datetime(df["Date"])
-        return df
+        if len(df) < 7:
+            raise Exception 
+        else:
+            df["Close"] = df["Close"].round(2)
+            df = df.loc[:, ["Close"]].reset_index().assign(Date=lambda x: x["Date"].dt.date)    
+            df["Daily_return (%)"] = round(df["Close"].pct_change() * 100, 2)
+            df["Date"] = pd.to_datetime(df["Date"])
+            return df
         
         

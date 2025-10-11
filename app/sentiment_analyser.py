@@ -12,7 +12,7 @@ class SentimentAnalyser:
     def tokenize_text(self, text):
         return self.tokenizer(text, return_tensors="pt", padding=True, truncation=True)
     
-    def analyze_sentiment(self, texts):
+    def analyse_sentiment(self, texts):
         with torch.no_grad():
             input_tokens = self.tokenize_text(texts)
             outputs = self.model(**input_tokens)
@@ -39,7 +39,7 @@ class SentimentDfGenerator:
         for i in range(0, len(titles), batch_size):
             print(f"Processing {i}/{len(titles)} batch...")
             batch = titles[i : i+batch_size]
-            cur_pred = stm_analyser.analyze_sentiment(batch)
+            cur_pred = stm_analyser.analyse_sentiment(batch)
             all_predictions.extend(cur_pred) # Add each item to all_predictions
             
         # Add prediction to dataframe    

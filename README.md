@@ -18,7 +18,7 @@ This dashboard fetches recent news articles from Google News RSS feed, performs 
   - Correlation scatter plots with trend lines
   - Side-by-side bar chart comparisons
 - **Multi-page Navigation**: Clean interface with separate pages for analysis, data tables, and graphs
-- **Data Export**: Download analyzed data as CSV files
+- **Data Export**: Download analysed data as CSV files
 
 ## 🚀 Demo
 
@@ -118,14 +118,14 @@ dependencies = [
 2. **Access the dashboard**
    - Open your browser and navigate to `http://localhost:8501`
 
-3. **Analyze a stock**
+3. **analyse a stock**
    - Enter a stock ticker (e.g., AAPL, NVDA, TSLA) in the sidebar
    - Click "Run Analysis"
    - Navigate between different pages to view results
 
 ## 🎨 Dashboard Pages
 
-### 1. 🔍 Analyze
+### 1. 🔍 analyse
 - Overview metrics (ticker, company name, correlation)
 - Summary statistics
 - Analysis output logs
@@ -147,7 +147,7 @@ dependencies = [
    - Retrieves stock price data from Yahoo Finance
 
 2. **Sentiment Analysis**
-   - Analyzes sentiment of each news headline using **FinBERT** (Financial BERT model from Hugging Face)
+   - analyses sentiment of each news headline using **FinBERT** (Financial BERT model from Hugging Face)
    - FinBERT is specifically trained on financial texts for accurate sentiment classification
    - Calculates daily average sentiment scores
    - Scores range from -1 (negative) to +1 (positive)
@@ -159,7 +159,7 @@ dependencies = [
 
 4. **Visualization**
    - Plots time series trends
-   - Analyzes correlation between sentiment and returns
+   - analyses correlation between sentiment and returns
    - Provides multiple visualization perspectives
 
 ## 📊 Sample Analysis
@@ -197,7 +197,7 @@ This project uses [FinBERT](https://huggingface.co/ProsusAI/finbert), a pre-trai
 - [Google News RSS](https://news.google.com/) - News articles
 - [ProsusAI/FinBERT](https://huggingface.co/ProsusAI/finbert) - Financial sentiment analysis model
 
-## 🐛 Known Issues
+## Known Issues
 
 - Analysis limited to past 7 days due to Google News RSS constraints
 - Weekend data is filtered out (no stock trading)
@@ -205,7 +205,7 @@ This project uses [FinBERT](https://huggingface.co/ProsusAI/finbert), a pre-trai
 - Sentiment analysis accuracy depends on headline quality and financial context
 
 
-## 📚 Research Background
+## Research Background
 
 This project ponders the question **"Does news headline of the company affect stock performance?"** by investigating whether publicly available news sentiment has predictive power for stock returns. 
 
