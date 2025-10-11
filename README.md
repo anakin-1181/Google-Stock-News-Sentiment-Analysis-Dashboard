@@ -74,7 +74,7 @@ This project uses [uv](https://github.com/astral-sh/uv) for fast dependency mana
 
 3. **Install dependencies**
    ```bash
-   pip install streamlit pandas matplotlib seaborn scipy yfinance feedparser numpy transformers torch bs4 requests praw
+   pip install streamlit pandas matplotlib seaborn scipy yfinance feedparser numpy transformers torch
    ```
 
 ## 📦 Dependencies
