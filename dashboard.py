@@ -23,7 +23,7 @@ st.sidebar.divider()
 
 # Input section in sidebar
 st.sidebar.header("Settings")
-input_tick = st.sidebar.text_input("Enter stock ticker:")
+input_tick = st.sidebar.text_input("Enter stock ticker:", value=st.session_state.get('input_tick', ''))
     
 # analyse button
 analyse_button = st.sidebar.button("Run Analysis", type="primary")
@@ -103,7 +103,7 @@ if not st.session_state.analysed:
     
 else:
     # Page 1: analyse Overview
-    if page == "analyse":
+    if page == "Analyse":
         st.header("Analysis Overview")
         
         # Metrics
