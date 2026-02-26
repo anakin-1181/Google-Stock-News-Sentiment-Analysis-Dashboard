@@ -1,10 +1,9 @@
 import pandas as pd
-import matplotlib.pyplot as plt
+import numpy as np
+import plotly.graph_objects as go
 from scipy.stats import zscore
-import seaborn as sns
 from scipy.stats import pearsonr
 from .data_processor import DataProcessor
-import matplotlib.pyplot as plt
 
 class DataAnalyser:
     figsize = (12,6)
@@ -28,63 +27,120 @@ class DataAnalyser:
         
         
     def plot_time_series(self):
-        plt.style.use("seaborn-v0_8-darkgrid")
-        
-        print(self.df)
-        
-        fig, ax = plt.subplots(figsize=DataAnalyser.figsize, dpi=100)
-        x = self.df.index
-        date = self.df["Date"]
-        stm_score = self.df["normalised_STM_Score"]
-        daily_return = self.df["normalised_Daily_return"]
-
-        ax.plot(x, stm_score, color="tab:orange", marker="o", label="normalised sentiment score")
-        ax.plot(x, daily_return, color="tab:blue", marker="o", label="normalised daily return")
-
-        ax.set_title(f"Sentiment Score vs Daily Return ({self.tick})")
-
-        # plt.axhline(y=0, color='black', linewidth=1)
-        ax.set_xticks(self.df.index)
-        ax.set_xticklabels(date)
-        # ax.tick_params(axis="x", labelrotation=45)
-        ax.legend()
-        plt.tight_layout()
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=self.df["Date"],
+                y=self.df["normalised_STM_Score"],
+                mode="lines+markers",
+                name="normalised sentiment score",
+                line=dict(color="#ff7f0e"),
+                marker=dict(size=8),
+                hovertemplate="Date: %{x}<br>Sentiment: %{y}<extra></extra>",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=self.df["Date"],
+                y=self.df["normalised_Daily_return"],
+                mode="lines+markers",
+                name="normalised daily return",
+                line=dict(color="#1f77b4"),
+                marker=dict(size=8),
+                hovertemplate="Date: %{x}<br>Daily Return: %{y}<extra></extra>",
+            )
+        )
+        fig.update_layout(
+            title=f"Sentiment Score vs Daily Return ({self.tick})",
+            xaxis_title="Date",
+            yaxis_title="Normalised Value",
+            template="plotly_white",
+            hovermode="x unified",
+        )
         return fig
         
     def plot_scatter(self):
-        sns.set_theme()
-        
-        fig, ax = plt.subplots(figsize=DataAnalyser.figsize, dpi=100)
-        
-        x = self.df.index
-        date = self.df["Date"]
         stm_score = self.df["normalised_STM_Score"]
         daily_return = self.df["normalised_Daily_return"]
-        corr, p_val = pearsonr(stm_score,daily_return)
-    
-        
-        sns.regplot(x=stm_score, y=daily_return, ax=ax, ci=None)
-        
-        ax.text(0.05, 0.95, f'r = {corr:.3f}', 
-            transform=ax.transAxes, 
-            verticalalignment='top',
-            bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
-        
-        ax.set_title(f"Sentiment Score vs Daily Return ({self.tick})")
-        ax.set_ylabel("Daily Return")
-        ax.set_xlabel("Sentiment Score")
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=stm_score,
+                y=daily_return,
+                mode="markers",
+                name="data points",
+                marker=dict(color="#ff7f0e", size=10, opacity=0.9, line=dict(color="#ffffff", width=1)),
+                text=self.df["Date"].astype(str),
+                hovertemplate="Date: %{text}<br>Sentiment: %{x}<br>Daily Return: %{y}<extra></extra>",
+            )
+        )
+
+        if len(self.df) > 1:
+            slope, intercept = np.polyfit(stm_score, daily_return, 1)
+            x_line = np.linspace(stm_score.min(), stm_score.max(), 100)
+            y_line = slope * x_line + intercept
+            fig.add_trace(
+                go.Scatter(
+                    x=x_line,
+                    y=y_line,
+                    mode="lines",
+                    name="trend line",
+                    line=dict(color="#d62728", dash="dash"),
+                    hoverinfo="skip",
+                )
+            )
+
+            corr, _ = pearsonr(stm_score, daily_return)
+            fig.add_annotation(
+                xref="paper",
+                yref="paper",
+                x=0.02,
+                y=0.98,
+                text=f"r = {corr:.3f}",
+                showarrow=False,
+                font=dict(color="#ffffff", size=14),
+                bgcolor="rgba(0, 0, 0, 0.75)",
+                bordercolor="#ff7f0e",
+                borderwidth=1,
+                borderpad=6,
+            )
+
+        fig.update_layout(
+            title=f"Sentiment Score vs Daily Return ({self.tick})",
+            xaxis_title="Sentiment Score",
+            yaxis_title="Daily Return",
+            template="plotly_white",
+        )
         return fig
         
     def plot_bar_charts(self):
-        fig, ax = plt.subplots(figsize=DataAnalyser.figsize, dpi=100)
-        
-        self.df[["normalised_STM_Score", "normalised_Daily_return"]].plot(kind="bar", ax=ax, color=["tab:orange", "tab:blue"])
-        
-        ax.set_title(f"Sentiment Score vs Daily Return ({self.tick})")
-        ax.legend(["normalised sentiment score", "normalised daily return"])
-        ax.set_xticklabels(self.df["Date"])
-        ax.tick_params(axis="x", labelrotation=0)
-        
+        fig = go.Figure()
+        fig.add_trace(
+            go.Bar(
+                x=self.df["Date"],
+                y=self.df["normalised_STM_Score"],
+                name="normalised sentiment score",
+                marker_color="#ff7f0e",
+                hovertemplate="Date: %{x}<br>Sentiment: %{y}<extra></extra>",
+            )
+        )
+        fig.add_trace(
+            go.Bar(
+                x=self.df["Date"],
+                y=self.df["normalised_Daily_return"],
+                name="normalised daily return",
+                marker_color="#1f77b4",
+                hovertemplate="Date: %{x}<br>Daily Return: %{y}<extra></extra>",
+            )
+        )
+        fig.update_layout(
+            title=f"Sentiment Score vs Daily Return ({self.tick})",
+            xaxis_title="Date",
+            yaxis_title="Normalised Value",
+            barmode="group",
+            template="plotly_white",
+        )
         return fig
         
         

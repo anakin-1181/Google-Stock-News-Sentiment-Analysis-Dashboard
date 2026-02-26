@@ -182,7 +182,7 @@ else:
         st.subheader("1. Time Series Comparison")
         st.caption("Track how sentiment and returns change over time")
         
-        st.pyplot(st.session_state.da.plot_time_series(), use_container_width=True)
+        st.plotly_chart(st.session_state.da.plot_time_series(), use_container_width=True)
         
         st.divider()
         
@@ -190,7 +190,7 @@ else:
         st.subheader("2. Correlation Analysis")
         st.caption("Examine the relationship between sentiment scores and daily returns")
         
-        st.pyplot(st.session_state.da.plot_scatter(), use_container_width=True)
+        st.plotly_chart(st.session_state.da.plot_scatter(), use_container_width=True)
         
         st.divider()
         
@@ -198,4 +198,4 @@ else:
         st.subheader("3. Side-by-Side Comparison")
         st.caption("Compare normalized sentiment and returns for each day")
         
-        st.pyplot(st.session_state.da.plot_bar_charts(), use_container_width=True)
+        st.plotly_chart(st.session_state.da.plot_bar_charts(), use_container_width=True)
