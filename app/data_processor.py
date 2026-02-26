@@ -7,11 +7,27 @@ class DataProcessor:
     def __init__(self, tick, company_name):
         self.tick = tick
         self.company_name = company_name
+
+    def _remove_duplicate_titles(self, df: pd.DataFrame) -> pd.DataFrame:
+        if "Title" not in df.columns:
+            return df
+
+        dedup_df = df.copy()
+        dedup_df["_title_key"] = (
+            dedup_df["Title"]
+            .astype(str)
+            .str.strip()
+            .str.replace(r"\s+", " ", regex=True)
+            .str.lower()
+        )
+        dedup_df = dedup_df.drop_duplicates(subset=["_title_key"]).drop(columns=["_title_key"])
+        return dedup_df.reset_index(drop=True)
         
     def generate_sentiment_df(self):
         # Prepare news headline dataframe
         headline_scrapper = GoogleNewsScrapper(tick=self.tick, company_name=self.company_name)
         input_df = headline_scrapper.generate_dataframe()
+        input_df = self._remove_duplicate_titles(input_df)
         # Process news headline dataframe with sentiment analyser
         stm_analyser = SentimentDfGenerator()
         analysed_df = stm_analyser.generate_analysed_df(df=input_df)
