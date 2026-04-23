@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from app.config import get_massive_api_key
 from app.data_processor import DataProcessor, TickerParser
 from app.data_analyser import DataAnalyser
 from io import StringIO
@@ -33,21 +34,14 @@ st.sidebar.divider()
 # Supported Tickers
 with st.sidebar.expander("Supported Tickers"):
     st.markdown("""
-    **US Stocks (No suffix needed):**
+    **Supported via Massive:**
     - `AAPL` - Apple
     - `MSFT` - Microsoft
     - `TSLA` - Tesla
-    
-    **International Stocks (Add suffix):**
-    - `.L` - London (e.g., `BARC.L`)
-    - `.TO` - Toronto (e.g., `SHOP.TO`)
-    - `.T` - Tokyo (e.g., `7203.T`)
-    - `.HK` - Hong Kong (e.g., `0700.HK`)
-    - `.PA` - Paris (e.g., `AIR.PA`)
-    - `.DE` - Frankfurt (e.g., `BMW.DE`)
-    
-    ⚠️ **Note:** Not all stocks are available.
-    Delisted or very small companies may not work.
+
+    Massive's stock endpoints are U.S.-market focused, so use standard U.S. stock tickers.
+
+    ⚠️ **Note:** International exchange suffixes are not supported in this version.
     """)
     
 st.sidebar.divider()
@@ -72,31 +66,41 @@ if 'input_tick' not in st.session_state:
 # ==================== analyse button logic ====================
 if analyse_button:
     input_tick = input_tick.strip().upper()
-    captured_output = StringIO()
-    sys.stdout = captured_output
-    
-    with st.spinner("Running analysis..."):
-        try:
-            print("Starting analysis...", "\n")
-            tp = TickerParser(ticker=input_tick)
-            company_name = tp.ticker_to_company_name()
-            
-            st.session_state.company_name = company_name 
-            st.session_state.input_tick = input_tick  
-            
-            # Initialize processors
-            st.session_state.dp = DataProcessor(tick=st.session_state.input_tick, company_name=st.session_state.company_name)
-            st.session_state.da = DataAnalyser(tick=st.session_state.input_tick, company_name=st.session_state.company_name)
-            st.session_state.sentiment_df = st.session_state.dp.generate_sentiment_df()[0]
-            
-            st.session_state.analysed = True
-            
-            print("\n","Analysis complete!")
-            st.success("Analysis completed successfully!")
-            
-        except Exception as e:
-            st.error(f"Please input a valid company ticker.")
-            st.session_state.analysed = False
+    if not input_tick:
+        st.error("Please enter a stock ticker.")
+        st.session_state.analysed = False
+    elif not get_massive_api_key():
+        st.error("Set `MASSIVE_API_KEY` locally or in Streamlit secrets before running the analysis.")
+        st.session_state.analysed = False
+    else:
+        captured_output = StringIO()
+        original_stdout = sys.stdout
+        sys.stdout = captured_output
+
+        with st.spinner("Running analysis..."):
+            try:
+                print("Starting analysis...", "\n")
+                tp = TickerParser(ticker=input_tick)
+                company_name = tp.ticker_to_company_name()
+                
+                st.session_state.company_name = company_name 
+                st.session_state.input_tick = input_tick  
+                
+                # Initialize processors
+                st.session_state.dp = DataProcessor(tick=st.session_state.input_tick, company_name=st.session_state.company_name)
+                st.session_state.da = DataAnalyser(tick=st.session_state.input_tick, company_name=st.session_state.company_name)
+                st.session_state.sentiment_df = st.session_state.dp.generate_sentiment_df()[0]
+                
+                st.session_state.analysed = True
+                
+                print("\n","Analysis complete!")
+                st.success("Analysis completed successfully!")
+                
+            except Exception as e:
+                st.error(str(e) or "Analysis failed.")
+                st.session_state.analysed = False
+            finally:
+                sys.stdout = original_stdout
 
 # ==================== analysed Pages ====================
 if not st.session_state.analysed:

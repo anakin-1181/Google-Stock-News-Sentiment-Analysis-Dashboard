@@ -23,7 +23,7 @@ This project ponders the question **"Does news headline of the company affect st
 
 - **Real-time News Scraping**: Fetches latest news articles from Google News RSS feeds
 - **AI-Powered Sentiment Analysis**: Utilizes FinBERT model from Hugging Face for financial sentiment classification
-- **Stock Data Integration**: Retrieves historical stock prices from Yahoo Finance
+- **Stock Data Integration**: Retrieves historical stock prices from Massive
 - **Interactive Visualizations**: 
   - Time series comparison of sentiment vs returns
   - Correlation scatter plots with trend lines
@@ -34,6 +34,22 @@ This project ponders the question **"Does news headline of the company affect st
 ## Demo
 
 [Live Demo (https://ssd-anakin1181.streamlit.app)](https://ssd-anakin1181.streamlit.app)
+
+## Configuration
+
+Set your Massive API key before running the dashboard locally:
+
+```bash
+export MASSIVE_API_KEY="your_api_key_here"
+```
+
+For Streamlit Cloud, add the same key in app secrets:
+
+```toml
+MASSIVE_API_KEY = "your_api_key_here"
+```
+
+Massive's stocks REST API is U.S.-market focused, so this dashboard now supports standard U.S. stock tickers such as `AAPL`, `MSFT`, and `TSLA`.
 
 
 ### 1. Analyse
@@ -55,7 +71,7 @@ This project ponders the question **"Does news headline of the company affect st
 
 1. **Data Collection**
    - Fetches news articles (max 100) from Google News RSS feed for the past 7 days
-   - Retrieves stock price data from Yahoo Finance
+   - Retrieves stock price data from Massive
 
 2. **Sentiment Analysis**
    - analyses sentiment of each news headline using **FinBERT** (Financial BERT model from Hugging Face)
@@ -89,6 +105,3 @@ This project ponders the question **"Does news headline of the company affect st
 - Positive correlation suggests news sentiment may influence returns
 - Negative correlation suggests contrarian market behavior
 - Near-zero correlation suggests weak relationship
-
-
-

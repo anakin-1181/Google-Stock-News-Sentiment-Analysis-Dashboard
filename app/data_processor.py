@@ -1,7 +1,8 @@
-from .data_scrapper import GoogleNewsScrapper, YFinanceScrapper
-from .sentiment_analyser import SentimentDfGenerator
 import pandas as pd
-import yfinance as yf
+
+from .data_scrapper import GoogleNewsScrapper, MassiveStockScrapper
+from .massive_client import MassiveClient
+from .sentiment_analyser import SentimentDfGenerator
 
 class DataProcessor:
     def __init__(self, tick, company_name):
@@ -40,9 +41,9 @@ class DataProcessor:
         
     
     def generate_full_df(self):
-        # Prepare stock data from yf
-        yf_scrapper = YFinanceScrapper(tick=self.tick)
-        stock_df = yf_scrapper.process_dataframe()
+        # Prepare stock price data
+        price_scrapper = MassiveStockScrapper(tick=self.tick)
+        stock_df = price_scrapper.process_dataframe()
         summary_df = self.generate_sentiment_df()[1]
         # Merge df 
         merged_df = summary_df.merge(stock_df, on="Date", how="left")
@@ -53,16 +54,13 @@ class DataProcessor:
 class TickerParser:
     def __init__(self, ticker):
         self.ticker = ticker.strip().upper()
-        
+
     def ticker_to_company_name(self):
         try:
-            stock = yf.Ticker(ticker=self.ticker)
-            hist = stock.history(period="5d")
-            if hist.empty:
-                raise ValueError("No stock data found")
-
-            metadata = getattr(stock, "history_metadata", {}) or {}
-            return metadata.get("longName") or metadata.get("shortName") or self.ticker
+            ticker_details = MassiveClient().lookup_stock_ticker(self.ticker)
+            if not ticker_details:
+                return self.ticker
+            return ticker_details.get("name") or self.ticker
         except Exception as e:
             print(e)
-            raise Exception
+            return self.ticker
