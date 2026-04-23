@@ -52,12 +52,19 @@ class DataProcessor:
         
 class TickerParser:
     def __init__(self, ticker):
-        self.ticker = ticker
+        self.ticker = ticker.strip().upper()
         
     def ticker_to_company_name(self):
         try:
             stock = yf.Ticker(ticker=self.ticker)
-            return stock.info["longName"]
+            if stock.history(period="5d").empty:
+                raise ValueError("No stock data found")
+
+            try:
+                info = stock.info
+                return info.get("longName") or info.get("shortName") or self.ticker
+            except Exception:
+                return self.ticker
         except Exception as e:
             print(e)
             raise Exception

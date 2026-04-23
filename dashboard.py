@@ -71,6 +71,7 @@ if 'input_tick' not in st.session_state:
 
 # ==================== analyse button logic ====================
 if analyse_button:
+    input_tick = input_tick.strip().upper()
     captured_output = StringIO()
     sys.stdout = captured_output
     
