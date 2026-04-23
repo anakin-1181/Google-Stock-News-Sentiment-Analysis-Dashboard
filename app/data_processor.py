@@ -57,14 +57,12 @@ class TickerParser:
     def ticker_to_company_name(self):
         try:
             stock = yf.Ticker(ticker=self.ticker)
-            if stock.history(period="5d").empty:
+            hist = stock.history(period="5d")
+            if hist.empty:
                 raise ValueError("No stock data found")
 
-            try:
-                info = stock.info
-                return info.get("longName") or info.get("shortName") or self.ticker
-            except Exception:
-                return self.ticker
+            metadata = getattr(stock, "history_metadata", {}) or {}
+            return metadata.get("longName") or metadata.get("shortName") or self.ticker
         except Exception as e:
             print(e)
             raise Exception
